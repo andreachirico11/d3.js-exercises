@@ -5,10 +5,10 @@ const svgWidth = 1000,
 
 const xAxis = d3.axisBottom().scale(xScale).ticks(20),
   yAxis = d3.axisRight().scale(yScale).ticks(20);
-  xgridlines = d3.axisLeft().tickSize(-svgWidth).ticks(10).scale(yScale);
-  ygridlines = d3.axisTop().tickSize(-svgHeight).ticks(20).scale(xScale);
-  
-  const svgContainer = d3
+xgridlines = d3.axisLeft().tickSize(-svgWidth).ticks(10).scale(yScale);
+ygridlines = d3.axisTop().tickSize(-svgHeight).ticks(20).scale(xScale);
+
+const svgContainer = d3
   .selectAll("main")
   .append("svg")
   .attr("width", svgWidth)
@@ -19,73 +19,63 @@ svgContainer.append("g").call(yAxis);
 svgContainer.append("g").call(xgridlines);
 svgContainer.append("g").call(ygridlines);
 
-
-
-
 const rectArray = [];
 let rectArrayCounter = 0;
-let startPos = {
-  x: 0,
-  y: 0,
-};
-let dimensions = {
-  width: 0,
-  height: 0,
-};
 
 
+// x2-x0 = -s cos β = -s cos (arctan [(x1-x0) / (y1-y0)])
+// y2-y0 = s sin β = s sin (arctan [(x1-x0) / (y1-y0)])
 
-let x0 = 34 , y0 = 43, x1 = 250, y1 = 37, x2 = 250, y2 = 79, shortSide = 60;
+let 
+  x0,
+  y0,
+  x1,
+  y1,
+  x2,
+  y2,
+  x3,
+  y3,
+  shortSide = 100;
 
-function calculateMissingCoo() {
+  
+  
+svgContainer.call(
+  d3
+  .drag()
+    .on("start", () => {
+      x0 = event.x;
+      y0 = event.y;
+    })
+    .on("drag", () => {
+      x1 = event.x;
+      y1 = event.y;
+      calculateMissingCoo();
+      drawRect();
+    })
+    .on("end", () => {
+      x1 = event.x;
+      y1 = event.y;
+      calculateMissingCoo()
+      drawRect();
+      rectArrayCounter++;
+    })
+);
 
+function drawRect() {
+  d3.select("#rect" + (rectArrayCounter).toString()).remove();
+  rectArray[rectArrayCounter] =
+  svgContainer
+  .append("polygon")
+  .attr("points", `${x0},${y0} ${x1},${y1} ${x2},${y2}`)
+  .attr("id", "rect" + rectArrayCounter.toString())
+  .attr("fill", "none")
+  .attr("stroke", "black");  
 }
-
-
-
-
-
-svgContainer.append('polygon').attr('points', `${x0},${y0} ${x1},${y1} ${x2},${y2}`);
-
-
-// svgContainer.call(
-//   d3
-//     .drag()
-//     .on("start", () => {
-//       startPos.x = event.x;
-//       startPos.y = event.y;
-//     })
-//     .on("drag", () => {
-//       finalPos.x = event.x;
-//       finalPos.y = event.y;
-//       drawRect();
-//     })
-//     .on("end", () => {
-//       finalPos.x = event.x;
-//       finalPos.y = event.y;
-//       drawRect();
-//       createRect();
-//       rectArrayCounter++;
-//     })
-// );
-
-// function drawRect() {
-//   d3.select("#rect" + rectArrayCounter.toString()).remove();
-//   rectArray[rectArrayCounter] = svgContainer
-//     .append("line")
-//     .attr("id", "line" + rectArrayCounter.toString())
-//     .attr("x", startPos.x)
-//     .attr("y", startPos.y)
-//     .attr("width", dimensions.width)
-//     .attr("height", finalPos.y)
-//     .attr("stroke-width", 2)
-//     .attr("stroke", "black");
-// }
-
-// function createRect() {
-//   rectArray[rectArrayCounter] = {
-//     id: "line" + rectArrayCounter.toString(),
-//     start: startPos,
-//     dimensions: dimensions,
-//   };
-// }
+  
+  function calculateMissingCoo() {
+    const angle = Math.atan((x0 - x1) / (y0 - y1));
+    x2 = x1 + -shortSide * Math.cos(angle);
+    y2 = y1 + shortSide * Math.sin(angle);
+    x3 = (x2*x1) / x0;  
+    y3 = (y2*y1) / y0;  
+  };

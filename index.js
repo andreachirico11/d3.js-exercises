@@ -20,6 +20,10 @@ app.get('/drawRect', (req, res, next) => {
   res.status(200);
   res.sendFile(path.join(__dirname , "views", "drawRect.html"));
 })
+app.get('/curve', (req, res, next) => {
+  res.status(200);
+  res.sendFile(path.join(__dirname , "views", "drawCurve.html"));
+})
 
 
 
